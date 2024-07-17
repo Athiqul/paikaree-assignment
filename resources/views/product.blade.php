@@ -47,67 +47,7 @@
                 <input type="text" id="table-search-users" class="block pt-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500     " placeholder="Search for Product">
             </div>
         </div>
-        <table class="w-full text-sm text-left rtl:text-right text-gray-500 ">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50  ">
-                <tr>
-                    <th scope="col" class="p-4">
-
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        Product Name
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        Price
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        Thumbnail
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        Action
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="bg-white border-b  ">
-                    <td class="w-4 p-4">
-                        <div class="flex items-center">
-                            <input id="checkbox-table-search-1" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500   ">
-                            <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
-                        </div>
-                    </td>
-                    <th scope="row" class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap ">
-                        <img class="w-10 h-10 rounded-full" src="/docs/images/people/profile-picture-1.jpg" alt="Jese image">
-                        <div class="ps-3">
-                            <div class="text-base font-semibold">Neil Sims</div>
-                            <div class="font-normal text-gray-500">neil.sims@flowbite.com</div>
-                        </div>
-                    </th>
-                    <td class="px-6 py-4">
-                        React Developer
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="flex items-center">
-                            <div class="h-2.5 w-2.5 rounded-full bg-green-500 me-2"></div> Online
-                        </div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <!-- Modal toggle -->
-                        <div  x-data={edit:false}>
-                            <a href="#" @click=" edit= !edit" title="edit product" type="button" data-modal-target="editUserModal" data-modal-show="editUserModal" class="font-bold text-[30px] text-gray-600  hover:underline"><i class="fa-regular fa-pen-to-square"></i></a>
-                              @include('includes.edit_modal')
-                        </div>
-
-
-                        <a href="#" title="View Product details" type="button" data-modal-target="editUserModal" data-modal-show="editUserModal" class="font-bold text-[30px] text-teal-600  hover:underline"><i class="fa-regular fa-eye"></i></a>
-
-                        <a href="#" title="Active Product" type="button" data-modal-target="editUserModal" data-modal-show="editUserModal" class="font-bold text-[30px] text-red-600  hover:underline"><i class="fa-regular fa-thumbs-up"></i></a>
-
-                        <a href="#" title="edit product" type="button" data-modal-target="editUserModal" data-modal-show="editUserModal" class="font-bold text-[30px] text-red-500  hover:underline"><i class="fa-solid fa-trash-can"></i></a>
-                    </td>
-                </tr>
-
-            </tbody>
-        </table>
+          @include('includes.product_table')
         <!-- Edit user modal -->
 
     </div>

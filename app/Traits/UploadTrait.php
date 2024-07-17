@@ -13,10 +13,13 @@ Trait UploadTrait{
     {
 
         try{
+
             $path=storage_path('app/uploads/',$folder);
 
 
         $imageName=uniqid().'.'.$image->getClientOriginalExtension();
+
+
 
         //Check Path is exist or not
         if(!File::isDirectory($path))
@@ -24,14 +27,18 @@ Trait UploadTrait{
           File::makeDirectory($path, 0777, true, true);
         }
 
-        //Resize and Save Image
-        $path = $image->storeAs($folder, $imageName, 'uploads');
-        // Full path to the saved image
-        $fullPath = $path.'/'.$imageName;
 
-        Image::make($fullPath)->fit($width,$height, function ($constraint) {
+
+
+        // Full path to the saved image
+
+        $fullPath = $path.$imageName;
+      //  dd($fullPath);
+
+        Image::make($image)->fit($width,$height, function ($constraint) {
             $constraint->upsize();
         })->save($fullPath);
+
 
         return $imageName;
         }catch(\Exception $e){

@@ -36,14 +36,6 @@ class Product extends Controller
 
 
     /**
-     * Show the form for creating a new resource.
-     */
-    // public function create()
-    // {
-
-    // }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(StoreProductRequest $request)
@@ -120,11 +112,6 @@ class Product extends Controller
              'product' => $product,
          ],200);
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-
 
     /**
      * Update the specified resource in storage.
