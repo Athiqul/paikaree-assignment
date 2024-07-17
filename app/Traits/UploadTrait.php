@@ -5,6 +5,7 @@ namespace App\Traits;
 use Exception;
 use Illuminate\Support\Facades\File;
 use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
 
 Trait UploadTrait{
 
@@ -37,6 +38,32 @@ Trait UploadTrait{
           throw new Exception($e->getMessage());
         }
 
+    }
+
+
+    //Delete Image
+    private function deleteImage($image)
+    {
+        $path="uploads/products/".$image;
+        if(Storage::exists($path))
+        {
+            Storage::delete($path);
+        }
+    }
+
+    //Show Image
+    public function showImage($image)
+    {
+        $path="uploads/products/".$image;
+        if(Storage::exists($path))
+        {
+            $mimeType=Storage::mimeType($path);
+            $headers=[
+                'Content-Type'=>$mimeType,
+            ];
+
+            return response()->file(storage_path("app/".$path),$headers);
+        }
     }
 }
 

@@ -9,4 +9,6 @@ class ProductImage extends Model
 {
     use HasFactory;
     protected $gaurded=[];
+
+
 }

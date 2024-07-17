@@ -9,4 +9,7 @@ class Product extends Model
 {
     use HasFactory;
     protected $gaurded=[];
+    public function images(){
+        return $this->hasMany(ProductImage::class);
+    }
 }

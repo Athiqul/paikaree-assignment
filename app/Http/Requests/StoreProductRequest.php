@@ -23,7 +23,7 @@ class StoreProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'=>['required','string','max:255','min:3'],
+            'name'=>['required','string','max:255','min:3','unique:products,name'],
             "price"=>['required','numeric'],
             "discount"=>['required','numeric','lt:price'],
             "thumbnail"=>["required",'image','mimes:png,jpg,webp',"max:2048"],
@@ -41,6 +41,7 @@ class StoreProductRequest extends FormRequest
             'name.string' => 'The product name must be a string.',
             'name.max' => 'The product name must not exceed 255 characters.',
             'name.min' => 'The product name must be at least 3 characters long.',
+            'name.unique'=>"Same Name product already created",
             'price.required' => 'Please provide the product price.',
             'price.numeric' => 'The product price must be a number.',
             'discount.required' => 'Please provide the product discount.',

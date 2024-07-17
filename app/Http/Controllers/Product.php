@@ -9,6 +9,7 @@ use Illuminate\View\View;
 use App\Traits\UploadTrait;
 use App\Models\ProductImage;
 use Illuminate\Support\Facades\DB;
+use App\Http\Request\UpdateProduct;
 class Product extends Controller
 {
 
@@ -21,11 +22,18 @@ class Product extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products=ModelsProduct::get();
-        return response()->json($products,200);
+        // Determine the limit for pagination
+        $limit = $request->get('limit', 10);
+
+        // Retrieve paginated products
+        $products = ModelsProduct::paginate($limit);
+
+        // Return paginated results as JSON
+        return response()->json($products, 200);
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -58,6 +66,7 @@ class Product extends Controller
                 "discount"=>$request->discount,
                 "price"=>$request->price,
                 "thumbnail"=>$thumbName,
+                "status"=>$request->status,
             ]);
 
              // Handle Multiple Upload Images
@@ -75,6 +84,11 @@ class Product extends Controller
 
             DB::commit();
 
+            return response()->json([
+               'success' => true,
+               'message' => 'Product created successfully',
+            ],200);
+
         }
         catch(\Exception $e)
         {
@@ -89,27 +103,127 @@ class Product extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified resource. Both edit and Show
      */
     public function show(string $id)
     {
-        //
+         $product=ModelsProduct::with('images')->find($id);
+         if($product==null)
+         {
+             return response()->json([
+                'success' => false,
+                'message' => 'Product not found',
+             ],200);
+         }
+         return response()->json([
+            'success' => true,
+             'product' => $product,
+         ],200);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
-    {
-        //
-    }
+
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateProduct $request, string $id)
     {
-        //
+        try {
+            $validated = $request->validated();
+
+            //Check Product Exist
+            $product=ModelsProduct::with('images')->find($id);
+            if($product==null)
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Product not found',
+                ],200);
+            }
+            //Handling Product Thumbnail
+            $thumbName=null;
+            if($request->hasFile('thumbnail'))
+            {
+                   //Deleting previous image from folder
+                  $this->deleteImage($product->thumbnail);
+                  //Store new Image
+                  $thumbnailFile=$request->file('thumbnail');
+                  //Store image file
+                  $thumbName=$this->uploadImage($thumbnailFile,'products',300,300);
+            }
+
+
+            //Save Product
+
+            //Check product name is exist for other products or not
+            $check=ModelsProduct::where('name',$request->name)->where('id','!=',$product->id)->first();
+            if($check)
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Already Have that same name product in the system !',
+                 ],200);
+            }
+            $product->name=$request->name;
+            $product->price=$request->price;
+            $product->discount=$request->discount;
+            $product->thumbnail=$thumbName??$product->thumbnail;
+            $product->status=$request->status;
+
+            if($product->isClean())
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nothing to update',
+                 ],200);
+            }
+
+            $product->save();
+
+             // Handle Multiple Upload Images
+             if ($request->hasFile('product_images')) {
+
+                //Removing Current Images
+                if($request->remove_image=="1")
+                {
+                      foreach($product->images as $image){
+
+                        $this->deleteImage($image);
+
+                      }
+                }
+
+                foreach ($request->file('product_images') as $image) {
+
+                     $imageName=$this->uploadImage($image,'products',300,300);
+                     ProductImage::create([
+                        "product_id"=>$product->id,
+                        "image"=>$imageName,
+                     ]);
+                }
+
+            }
+
+            DB::commit();
+
+            return response()->json([
+               'success' => true,
+               'message' => 'Product created successfully',
+            ],200);
+
+        }
+        catch(\Exception $e)
+        {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Exception occurs',
+                'errors' => $e->getMessage(),
+            ],200);
+        }
     }
 
     /**
@@ -117,6 +231,63 @@ class Product extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try{
+            $product=ModelsProduct::find($id);
+            if(!$product)
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Product does not found!',
+                    'errors' => '',
+                ],200);
+            }
+
+            $product->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'Successfully Product Remove the System',
+                'errors' => '',
+            ],200);
+        }catch(\Exception)
+        {
+            return response()->json([
+                'success' => false,
+                'message' => 'Exception occurs',
+                'errors' => $e->getMessage(),
+            ],200);
+        }
+    }
+
+
+    //Make Publish & unpublish
+    public function status($id)
+    {
+        try{
+            $product=ModelsProduct::find($id);
+            if(!$product)
+            {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Product does not found',
+                    'errors' => '',
+                ],200);
+            }
+
+            $product->status=($product->status=="1")?'0':'1';
+            $product->save();
+            $msg=($product->status=="1")?'Published':'Unpublished';
+            return response()->json([
+                'success' => true,
+                'message' => "Successfully Product $msg ",
+                'errors' => '',
+            ],200);
+        }catch(\Exception)
+        {
+            return response()->json([
+                'success' => false,
+                'message' => 'Exception occurs',
+                'errors' => $e->getMessage(),
+            ],200);
+        }
     }
 }
