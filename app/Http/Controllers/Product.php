@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest as UpdateProduct;
 use App\Models\Product as ModelsProduct;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Traits\UploadTrait;
 use App\Models\ProductImage;
 use Illuminate\Support\Facades\DB;
-use App\Http\Request\UpdateProduct;
 class Product extends Controller
 {
 
@@ -24,16 +24,24 @@ class Product extends Controller
      */
     public function index(Request $request)
     {
-        // Determine the limit for pagination
-        $limit = $request->get('limit', 10);
+        // Determine the limit for pagination (default: 10)
+        $limit = $request->query('limit', 10);
 
-        // Retrieve paginated products
-        $products = ModelsProduct::orderBy('id','desc')->paginate($limit);
+        // Determine the order for sorting (default: 'asc')
+        $order = $request->query('price', 'asc');
+
+        // Retrieve paginated products with optional search query
+        $products = ModelsProduct::orderBy('price', $order)
+                           ->when($request->filled('search')!=='', function ($query) use ($request) {
+                               $searchTerm = $request->query('search');
+                               return $query->where('name', 'like', '%' . $searchTerm . '%');
+                               // Add more fields to search as needed
+                           })
+                           ->paginate($limit);
 
         // Return paginated results as JSON
         return response()->json($products, 200);
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -116,10 +124,15 @@ class Product extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProduct $request, string $id)
+
+
+
+    public function updateItem(UpdateProduct $request,string $id)
     {
         try {
-            $validated = $request->validated();
+
+
+            //dd($request->all());
 
             //Check Product Exist
             $product=ModelsProduct::with('images')->find($id);
@@ -155,8 +168,8 @@ class Product extends Controller
                  ],200);
             }
             $product->name=$request->name;
-            $product->price=$request->price;
-            $product->discount=$request->discount;
+            $product->price=$request->price*100;
+            $product->discount=$request->discount*100;
             $product->thumbnail=$thumbName??$product->thumbnail;
             $product->status=$request->status;
 
@@ -212,7 +225,6 @@ class Product extends Controller
             ],200);
         }
     }
-
     /**
      * Remove the specified resource from storage.
      */
@@ -229,13 +241,15 @@ class Product extends Controller
                 ],200);
             }
 
+            //Delete Product Images
+$productImages=ProductImage::where('product_id',$id)->delete();
             $product->delete();
             return response()->json([
                 'success' => true,
                 'message' => 'Successfully Product Remove the System',
                 'errors' => '',
             ],200);
-        }catch(\Exception)
+        }catch(\Exception $e)
         {
             return response()->json([
                 'success' => false,

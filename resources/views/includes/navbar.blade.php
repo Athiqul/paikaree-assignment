@@ -29,4 +29,18 @@
         </div>
       </nav>
 
+      <script>
+        const searchTop = document.getElementById('search-navbar');
+searchTop.addEventListener('input', function(event) {
+const searchTerm = event.target.value.trim();// Trim whitespace from input
+if(searchTerm.length>2)
+{
+showProduct(10,'asc',searchTerm);
+}else{
+showProduct();
+}
+ // Call showProduct with search term
+});
+        </script>
+
 </header>
