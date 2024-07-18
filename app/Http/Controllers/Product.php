@@ -28,7 +28,7 @@ class Product extends Controller
         $limit = $request->get('limit', 10);
 
         // Retrieve paginated products
-        $products = ModelsProduct::paginate($limit);
+        $products = ModelsProduct::orderBy('id','desc')->paginate($limit);
 
         // Return paginated results as JSON
         return response()->json($products, 200);
@@ -55,8 +55,8 @@ class Product extends Controller
            DB::beginTransaction();
             $product=ModelsProduct::create([
                 "name"=>$request->name,
-                "discount"=>$request->discount,
-                "price"=>$request->price,
+                "discount"=>$request->discount*100,
+                "price"=>$request->price*100,
                 "thumbnail"=>$thumbName,
                 "status"=>$request->status,
             ]);

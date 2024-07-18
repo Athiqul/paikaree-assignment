@@ -9,12 +9,12 @@ use Illuminate\Support\Facades\Storage;
 
 Trait UploadTrait{
 
-    private function uploadImage($image,$folder,$width=300,$height=300)
+    private function uploadImage($image,$folder='products',$width=300,$height=300)
     {
 
         try{
 
-            $path=storage_path('app/uploads/',$folder);
+            $path=storage_path('app/uploads/'.$folder);
 
 
         $imageName=uniqid().'.'.$image->getClientOriginalExtension();
@@ -32,8 +32,7 @@ Trait UploadTrait{
 
         // Full path to the saved image
 
-        $fullPath = $path.$imageName;
-      //  dd($fullPath);
+        $fullPath = $path.'/'.$imageName;
 
         Image::make($image)->fit($width,$height, function ($constraint) {
             $constraint->upsize();

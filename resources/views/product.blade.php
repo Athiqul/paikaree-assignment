@@ -48,6 +48,7 @@
             </div>
         </div>
           @include('includes.product_table')
+          @include('includes.edit_modal')
         <!-- Edit user modal -->
 
     </div>
